@@ -1,0 +1,481 @@
+# 🔴 DFCRM — Dynamic Fraud Contamination & Recovery Model
+
+> A graph-native, real-time fraud detection system that models how fraud risk **spreads**, **classifies exposure zones**, and **dynamically recovers trust** using behavioral fingerprinting on a Neo4j graph database.
+
+---
+
+## 📌 Table of Contents
+
+1. [What Is DFCRM?](#what-is-dfcrm)
+2. [Why Graph Database?](#why-graph-database)
+3. [Core Innovation: Behavioral Rhythm Fingerprinting](#core-innovation)
+4. [How Risk Is Calculated](#how-risk-is-calculated)
+5. [The Three Risk Zones](#the-three-risk-zones)
+6. [Trust Recovery Mechanism](#trust-recovery-mechanism)
+7. [Project Structure](#project-structure)
+8. [Tech Stack](#tech-stack)
+9. [Setup & Installation](#setup--installation)
+10. [Running the Project Step by Step](#running-the-project-step-by-step)
+11. [API Endpoints](#api-endpoints)
+12. [Dashboard Guide](#dashboard-guide)
+13. [Key Demo Scenario](#key-demo-scenario)
+14. [How DFCRM Differs From Normal Fraud Detection](#how-dfcrm-differs)
+15. [Project Metrics](#project-metrics)
+
+---
+
+## What Is DFCRM?
+
+Most fraud detection systems do three things: detect fraud, assign a risk score, and stop there. They treat fraud risk as **static** — a property of an individual transaction at a single point in time.
+
+In real financial networks, risk doesn't work that way. It **spreads** through connections. It **evolves** over time. It **fades** when behavior normalizes. And it **reappears** when suspicious patterns return.
+
+DFCRM models this entire lifecycle on a graph database. Every account has a behavioral baseline. Every transaction is checked against that baseline. Risk propagates through the network from confirmed fraud nodes. And accounts can recover trust when they return to normal behavior.
+
+**One-line summary:**
+> *Instead of just detecting fraud, DFCRM models how fraud risk spreads through a financial network, uses behavioral fingerprinting to detect compromise, classifies exposure zones in real time, and recovers trust dynamically when behavior normalizes.*
+
+---
+
+## Why Graph Database?
+
+Traditional SQL databases store accounts, transactions, and relationships in separate tables. Finding multi-hop fraud patterns requires multiple JOIN operations that grow exponentially with each additional hop.
+
+**SQL — finding a 3-hop circular transaction:**
+```sql
+SELECT a1.id, a2.id, a3.id
+FROM accounts a1
+JOIN transactions t1 ON a1.id = t1.from_account
+JOIN accounts a2 ON t1.to_account = a2.id
+JOIN transactions t2 ON a2.id = t2.from_account
+JOIN accounts a3 ON t2.to_account = a3.id
+JOIN transactions t3 ON a3.id = t3.from_account
+WHERE t3.to_account = a1.id;
+-- On 100K accounts: several minutes. On 10M accounts: impractical.
+```
+
+**Neo4j Cypher — same query:**
+```cypher
+MATCH (a1)-[:SENT*3]->()-[:RECEIVED]->(a1)
+RETURN a1
+-- Executes in milliseconds regardless of database size.
+```
+
+Graph databases store relationships as physical pointers (index-free adjacency), so traversal time is constant per hop rather than exponential. This makes multi-hop fraud ring detection practical in real time.
+
+---
+
+## Core Innovation
+
+### Behavioral Rhythm Fingerprinting
+
+The central innovation of DFCRM is that every Account node in Neo4j carries a **behavioral fingerprint** stored directly as node properties. This fingerprint is computed from the last 90 days of transaction history and represents what *normal* looks like for that specific account.
+
+The fingerprint has five dimensions:
+
+| Dimension | What It Measures |
+|-----------|-----------------|
+| `hour_vector` | 24-value array showing proportion of transactions per hour of day |
+| `amount_mean` + `amount_std` | Typical transaction size and variability |
+| `daily_velocity` | Average transactions per day over 90 days |
+| `counterparty_weekly` | Average unique accounts transacted with per week |
+| `device_count` | Number of unique devices used |
+
+When a new transaction arrives, the system computes a **drift score** by comparing the incoming behavior against the stored fingerprint across three dimensions:
+
+```
+Drift Score = (0.3 × Time Drift) + (0.4 × Amount Drift) + (0.3 × Velocity Drift)
+```
+
+- **Time Drift** — Is this transaction happening at an unusual hour for this account?
+- **Amount Drift** — How many standard deviations from normal is this amount? (z-score)
+- **Velocity Drift** — Is this account transacting much faster than its baseline today?
+
+---
+
+## How Risk Is Calculated
+
+DFCRM combines two signals into a single risk score:
+
+```
+Risk(v) = α × ContaminationScore(hops) + β × DriftScore(v)
+```
+
+Where **α = 0.6** (structural weight) and **β = 0.4** (behavioral weight).
+
+**ContaminationScore** decays with hop distance from the nearest confirmed fraud node:
+
+| Hop Distance | Contamination Score |
+|-------------|-------------------|
+| 1 hop (direct neighbor of fraud) | 1.0 |
+| 2 hops | 0.6 |
+| 3 hops | 0.3 |
+| 4+ hops | 0.1 |
+| No connection found | 0.0 |
+
+**What this means in practice:**
+
+- An account 2 hops from fraud with **zero drift** → Risk = `0.6 × 0.6 + 0.4 × 0.0` = **0.36 → Clean**
+- An account 2 hops from fraud with **high drift (0.8)** → Risk = `0.6 × 0.6 + 0.4 × 0.8` = **0.68 → Exposed**
+- An account 1 hop from fraud with **extreme drift** → Risk → **Critical**
+
+Same structural position, different behavior, different outcome. That's the thesis.
+
+---
+
+## The Three Risk Zones
+
+| Zone | Threshold | Action |
+|------|-----------|--------|
+| 🔴 Critical | Risk ≥ 0.75 | Block immediately, escalate to compliance |
+| 🟡 Exposed | Risk 0.45–0.75 | Increased monitoring, flag for review |
+| 🟢 Clean | Risk < 0.45 | Normal operations |
+
+Banks operate in zones, not decimal scores. This aligns DFCRM directly with real-world compliance workflows.
+
+---
+
+## Trust Recovery Mechanism
+
+Most fraud systems only move risk upward. DFCRM implements **dual-condition trust recovery** — an account can move from Exposed back to Clean only if **both** conditions are met:
+
+1. **Time has passed** since the last fraud connection (exponential decay)
+2. **Behavioral drift is low** (drift score < 0.2 — account is acting normally again)
+
+```
+New Contamination = Current × e^(-0.1 × days_clean)   [only if drift < 0.2]
+```
+
+If drift is still above 0.2, contamination is held at a minimum of 0.3 regardless of time. The account must return to normal behavior before recovery begins.
+
+---
+
+## Project Structure
+
+```
+dfcrm_project/
+├── config/
+│   └── .env                  # Neo4j credentials
+├── data/
+│   └── generator.py          # Synthetic data generation (500 accounts, 5000+ txns)
+├── graph/
+│   └── schema.py             # Neo4j constraints and indexes
+├── engine/
+│   ├── fingerprint.py        # Behavioral fingerprint computation
+│   ├── drift.py              # Real-time drift detection
+│   └── contamination.py      # Risk scoring and zone classification
+├── api/
+│   └── main.py               # FastAPI REST endpoints
+├── dashboard/
+│   └── app.py                # Streamlit live dashboard
+└── main.py                   # Full pipeline orchestration
+```
+
+---
+
+## Tech Stack
+
+| Technology | Role |
+|-----------|------|
+| Neo4j | Graph database — nodes, relationships, Cypher queries |
+| Python 3 | Core engine logic |
+| FastAPI | REST API layer |
+| Streamlit | Live dashboard |
+| Faker + NumPy | Synthetic data generation |
+| python-dotenv | Environment configuration |
+
+---
+
+## Setup & Installation
+
+### Prerequisites
+- Python 3.9+
+- Neo4j Desktop — download from [neo4j.com/download](https://neo4j.com/download)
+- Node running in Neo4j Desktop with password set
+
+### 1. Clone / create the project folder
+
+```bash
+mkdir -p dfcrm_project/{config,data,graph,engine,api,dashboard}
+cd dfcrm_project
+```
+
+### 2. Create virtual environment
+
+```bash
+# Mac/Linux
+python3 -m venv fraud_env
+source fraud_env/bin/activate
+
+# Windows
+python -m venv fraud_env
+fraud_env\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install neo4j faker numpy pandas fastapi uvicorn streamlit python-dotenv
+```
+
+### 4. Configure Neo4j credentials
+
+Create `config/.env`:
+```
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=your_password_here
+```
+
+### 5. Start Neo4j
+
+Open Neo4j Desktop, start your local database, and confirm it's running at `http://localhost:7474`.
+
+---
+
+## Running the Project Step by Step
+
+Run each command from inside the `dfcrm_project/` directory with the virtual environment activated.
+
+### Step 1 — Create graph schema (constraints + indexes)
+
+```bash
+python3 graph/schema.py
+```
+
+**Expected output:**
+```
+Connection successful
+✅ Constraints created
+✅ Indexes created
+✅ Schema setup complete
+```
+
+### Step 2 — Generate synthetic data
+
+```bash
+python3 data/generator.py
+```
+
+**Expected output:**
+```
+🚀 Starting data generation...
+✅ 500 accounts created
+✅ 10 accounts marked as fraud
+✅ 80 devices created
+✅ 100 IP nodes created
+✅ Accounts linked to devices
+✅ Accounts linked to IPs
+✅ 5000 transactions created
+✅ Fraud patterns injected
+✅ Data generation complete
+   Fraud IDs: ['ACC00XXX', ...]   ← save these IDs
+```
+
+> ⚠️ Save the printed Fraud IDs. You'll use them to verify contamination spread.
+
+### Step 3 — Verify data in Neo4j Browser
+
+Open `http://localhost:7474` and run:
+
+```cypher
+-- Count all node types
+MATCH (n) RETURN labels(n)[0] as type, count(n) as total
+
+-- View a fraud account's connections
+MATCH (a:Account {account_id: 'ACC00XXX'})-[r]-(connected)
+RETURN a, r, connected LIMIT 25
+
+-- Confirm circular fraud patterns were injected
+MATCH path = (a1:Account)-[:SENT]->(:Transaction)-[:RECEIVED]->
+             (a2:Account)-[:SENT]->(:Transaction)-[:RECEIVED]->
+             (a3:Account)-[:SENT]->(:Transaction)-[:RECEIVED]->(a1)
+RETURN a1.account_id, a2.account_id, a3.account_id LIMIT 5
+```
+
+### Step 4 — Compute behavioral fingerprints
+
+```bash
+python3 engine/fingerprint.py
+```
+
+**Expected output:**
+```
+🔍 Computing fingerprints for 500 accounts...
+   Processed 50/500...
+   ...
+✅ Fingerprinting complete
+   Computed : 500
+   Skipped  : 0 (insufficient history)
+```
+
+This writes `hour_vector`, `amount_mean`, `amount_std`, `daily_velocity`, `counterparty_weekly`, and `device_count` directly onto each Account node in Neo4j.
+
+### Step 5 — Test drift detection
+
+```bash
+python3 engine/drift.py
+```
+
+**Expected output:**
+```
+✅ Scenario 1 - Normal transaction:    Drift Score: ~0.3  (LOW)
+🚨 Scenario 2 - Suspicious transaction: Drift Score: 1.0   (HIGH)
+⚠️  Scenario 3 - Moderate drift:        Drift Score: ~0.58 (MEDIUM)
+```
+
+### Step 6 — Run contamination scoring
+
+```bash
+python3 engine/contamination.py
+```
+
+**Expected output:**
+```
+✅ Contamination pass complete
+   🔴 Critical : 0
+   🟡 Exposed  : ~195
+   🟢 Clean    : ~295
+```
+
+### Step 7 — Run full pipeline (Steps 4 + 6 together)
+
+```bash
+python3 main.py
+```
+
+Use this command to refresh all fingerprints and recompute all risk scores in one go. In production, this would be scheduled to run periodically.
+
+### Step 8 — Start the API
+
+```bash
+uvicorn api.main:app --reload --port 8000
+```
+
+API will be live at `http://localhost:8000`
+Interactive docs at `http://localhost:8000/docs`
+
+### Step 9 — Start the dashboard
+
+Open a **second terminal**, activate the environment, and run:
+
+```bash
+cd dfcrm_project
+source ../fraud_env/bin/activate   # Mac/Linux
+streamlit run dashboard/app.py
+```
+
+Dashboard opens automatically at `http://localhost:8501`
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Health check |
+| GET | `/stats` | Zone distribution across entire network |
+| GET | `/account/{account_id}` | Full risk profile for one account |
+| GET | `/zone/{zone}` | All accounts in Critical / Exposed / Clean |
+| POST | `/transaction` | Process a transaction in real time, updates risk zone |
+| GET | `/fraud-neighbors/{account_id}` | Fraud accounts within 3 hops |
+
+**Example: Process a transaction**
+```bash
+curl -X POST http://localhost:8000/transaction \
+  -H "Content-Type: application/json" \
+  -d '{"sender_id": "ACC00007", "receiver_id": "ACC00100", "amount": 150000, "hour": 3}'
+```
+
+**Example response:**
+```json
+{
+  "sender_id": "ACC00007",
+  "drift_score": 0.6667,
+  "risk_score": 0.8667,
+  "zone": "Critical",
+  "hop_distance": 1
+}
+```
+
+---
+
+## Dashboard Guide
+
+The Streamlit dashboard has four sections:
+
+**Metrics Row** — Live count of total accounts, Critical, Exposed, and Clean zones. Refreshes when the page reloads.
+
+**Account Risk Lookup** — Enter any account ID to see its full risk profile: zone, risk score, drift score, hop distance, fraud status, behavioral fingerprint values, and a list of the nearest fraud accounts with their hop distances.
+
+**Transaction Simulator** — Enter a sender ID, receiver ID, amount, and hour. Click Process Transaction to submit a live transaction. The system computes drift, recalculates risk, and returns the updated zone instantly. This is the key demo feature.
+
+**Exposed Accounts Table** — Full scrollable table of all currently Exposed accounts sorted by contamination score.
+
+---
+
+## Key Demo Scenario
+
+This is the most important demonstration of DFCRM's value. Run it to prove the behavioral fingerprinting works.
+
+1. Look up account `ACC00007` — it should show **Exposed**, Risk 0.6, Drift 0.0, 1 hop from fraud
+2. In the transaction simulator, enter:
+   - Sender: `ACC00007`
+   - Amount: `150000`
+   - Hour: `3`
+3. Click Process Transaction
+4. Observe: Risk jumps to **0.8667**, Zone shifts to **Critical**, Drift hits **0.6667**
+
+**Why this matters:** ACC00007 is not a fraud account. A standard proximity-based system would have kept it at Exposed because its structural position didn't change. DFCRM elevated it to Critical because its behavior changed — a $150,000 transaction at 3am from an account whose normal average is $6,796 is a clear behavioral anomaly.
+
+This proves the thesis: **structural proximity + behavioral drift = more accurate risk than either signal alone.**
+
+---
+
+## How DFCRM Differs
+
+| Approach | What It Does | What It Misses |
+|----------|-------------|----------------|
+| Threshold rules | Flags amount > X or velocity > Y | Cross-account patterns, multi-hop rings |
+| Standard graph fraud | Proximity-based risk from fraud neighbors | Behavioral component, false positives |
+| Label propagation | Spreads risk through graph | Fixed weights, no recovery, no behavior |
+| GNN-based detection | Learns graph structure | Requires labeled training data, no recovery |
+| **DFCRM** | Structural + behavioral risk, adaptive zones, dual-condition recovery | Scale testing, evaluation metrics (future work) |
+
+The specific combination — storing behavioral fingerprints as graph node properties and combining them with structural contamination in a single weighted formula — is not a standard implementation in open fraud detection research.
+
+---
+
+## Project Metrics
+
+| Metric | Value |
+|--------|-------|
+| Total accounts | 500 |
+| Confirmed fraud accounts | 10 |
+| Transactions generated | 5,000+ |
+| Time period covered | 90 days |
+| Exposed accounts | ~195 (39% of non-fraud) |
+| Clean accounts | ~295 (60% of non-fraud) |
+| Fingerprint dimensions | 5 |
+| API endpoints | 5 |
+| Risk formula | Risk = 0.6 × Structural + 0.4 × Drift |
+| Recovery decay rate | λ = 0.1 per day |
+| Drift threshold for recovery | < 0.2 |
+
+---
+
+## Future Improvements
+
+- **Evaluation metrics layer** — Precision, recall, false positive rate against labeled fraud scenarios
+- **Larger synthetic dataset** — 50,000+ accounts to test performance at scale
+- **Temporal graph evolution** — Replay graph history to detect when fraud rings form
+- **Adaptive weight tuning** — Automatically tune α and β based on false positive feedback
+- **LLM audit trail** — Generate natural language explanations of contamination paths for compliance teams
+
+---
+
+## Author
+
+Built as a portfolio project demonstrating graph database applications in financial fraud detection.
+
+**Stack:** Neo4j · Python · FastAPI · Streamlit · Behavioral Biometrics · Graph Contamination Modeling
