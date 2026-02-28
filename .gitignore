@@ -8,3 +8,9 @@ config/.env
 
 # Mac
 .DS_Store
+
+fraud_env/
+venv/
+__pycache__/
+*.pyc
+.env
