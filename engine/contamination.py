@@ -181,6 +181,113 @@ def test_specific_accounts():
         print(f"Zone    : {zone}")
         print()
 
+def simulate_temporal_risk(steps=10, decay_rate=0.1, signal_probability=0.2, drift_threshold=0.6, accounts=None, plot=False, sample_accounts=5, random_seed=42):
+    """
+    Time-based risk simulation with decay and re-scoring.
+    If accounts is None, pulls all non-fraud accounts from the graph and uses stored drift_score.
+    When a new fraud signal appears in a step, recompute risk using DFCRM formula.
+    Otherwise, apply multiplicative decay: new_risk = prev_risk * (1 - decay_rate).
+    Returns a pandas DataFrame with risk over time for each account.
+    """
+    import random
+    random.seed(random_seed)
+    try:
+        import pandas as pd
+    except Exception:
+        pd = None
+    results = []
+    if accounts is None:
+        with driver.session() as session:
+            result = session.run("""
+                MATCH (a:Account)
+                WHERE coalesce(a.is_fraud, false) = false
+                RETURN a.account_id as account_id,
+                       coalesce(a.drift_score, 0.0) as base_drift
+            """)
+            accounts = [{"account_id": r["account_id"], "base_drift": r["base_drift"]} for r in result]
+        enriched = []
+        for acc in accounts:
+            hop = get_hop_distance(acc["account_id"])
+            base_risk = compute_contamination_score(hop, acc["base_drift"])
+            enriched.append({
+                "account_id": acc["account_id"],
+                "hop_distance": hop,
+                "base_drift": acc["base_drift"],
+                "risk0": base_risk
+            })
+        accounts = enriched
+    else:
+        enriched = []
+        for acc in accounts:
+            hop = acc.get("hop_distance")
+            if hop is None:
+                hop = get_hop_distance(acc["account_id"])
+            base_drift = acc.get("base_drift", acc.get("drift_score", 0.0))
+            base_risk = acc.get("risk0")
+            if base_risk is None:
+                base_risk = compute_contamination_score(hop, base_drift)
+            enriched.append({
+                "account_id": acc["account_id"],
+                "hop_distance": hop,
+                "base_drift": base_drift,
+                "risk0": base_risk
+            })
+        accounts = enriched
+    for acc in accounts:
+        prev_risk = acc["risk0"]
+        results.append({
+            "account_id": acc["account_id"],
+            "step": 0,
+            "risk_score": round(prev_risk, 4),
+            "zone": classify_zone(prev_risk),
+            "drift_score": acc["base_drift"],
+            "signal": True
+        })
+        for t in range(1, steps + 1):
+            base = acc["base_drift"]
+            signal = (base >= drift_threshold) or (random.random() < signal_probability)
+            if signal:
+                drift_t = max(base, min(1.0, base + random.uniform(0.2, 0.6)))
+                risk_t = compute_contamination_score(acc["hop_distance"], drift_t)
+            else:
+                risk_t = prev_risk * (1.0 - decay_rate)
+            risk_t = round(risk_t, 4)
+            results.append({
+                "account_id": acc["account_id"],
+                "step": t,
+                "risk_score": risk_t,
+                "zone": classify_zone(risk_t),
+                "drift_score": base,
+                "signal": signal
+            })
+            prev_risk = risk_t
+    if plot:
+        try:
+            import matplotlib.pyplot as plt
+            if pd is None:
+                raise RuntimeError("pandas not available for plotting")
+            df = pd.DataFrame(results)
+            unique_accounts = list({r["account_id"] for r in results})
+            random.shuffle(unique_accounts)
+            to_plot = unique_accounts[:max(1, sample_accounts)]
+            plt.figure(figsize=(8, 5))
+            for acc_id in to_plot:
+                sub = df[df["account_id"] == acc_id]
+                plt.plot(sub["step"], sub["risk_score"], label=acc_id)
+            plt.axhline(ZONE_THRESHOLDS["Critical"], color="r", linestyle="--", alpha=0.6)
+            plt.axhline(ZONE_THRESHOLDS["Exposed"], color="y", linestyle="--", alpha=0.6)
+            plt.xlabel("Step")
+            plt.ylabel("Risk")
+            plt.title("Temporal Risk Evolution")
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+        except Exception as e:
+            print(f"Plotting skipped: {e}")
+    if pd is not None:
+        return pd.DataFrame(results)
+    return results
+
 if __name__ == "__main__":
     test_specific_accounts()
     run_full_contamination_pass()

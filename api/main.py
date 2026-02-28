@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 from engine.drift import compute_drift_score, save_drift_score
-from engine.contamination import update_account_risk
+from engine.contamination import update_account_risk, simulate_temporal_risk
 
 load_dotenv("config/.env")
 
@@ -27,6 +27,13 @@ class TransactionEvent(BaseModel):
     receiver_id: str
     amount: float
     hour: int  # 0-23
+
+class TemporalSimRequest(BaseModel):
+    steps: int = 10
+    decay_rate: float = 0.1
+    signal_probability: float = 0.2
+    drift_threshold: float = 0.6
+    sample_accounts: int = 5
 
 # ---------- ENDPOINTS ----------
 
@@ -174,4 +181,38 @@ def get_fraud_neighbors(account_id: str):
         "account_id": account_id,
         "fraud_neighbors": neighbors,
         "count": len(neighbors)
+    }
+
+@app.post("/simulate-temporal")
+def simulate_temporal(request: TemporalSimRequest):
+    data = simulate_temporal_risk(
+        steps=request.steps,
+        decay_rate=request.decay_rate,
+        signal_probability=request.signal_probability,
+        drift_threshold=request.drift_threshold,
+        plot=False,
+        sample_accounts=request.sample_accounts
+    )
+    try:
+        import pandas as pd
+        if isinstance(data, pd.DataFrame):
+            avg = data.groupby("step")["risk_score"].mean().round(4).reset_index()
+            return {
+                "results": data.to_dict(orient="records"),
+                "avg_by_step": avg.to_dict(orient="records"),
+                "steps": request.steps,
+                "decay_rate": request.decay_rate
+            }
+    except Exception:
+        pass
+    from collections import defaultdict
+    avg_map = defaultdict(list)
+    for row in data:
+        avg_map[row["step"]].append(row["risk_score"])
+    avg_by_step = [{"step": k, "risk_score": round(sum(v) / max(1, len(v)), 4)} for k, v in sorted(avg_map.items())]
+    return {
+        "results": data,
+        "avg_by_step": avg_by_step,
+        "steps": request.steps,
+        "decay_rate": request.decay_rate
     }
