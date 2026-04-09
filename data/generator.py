@@ -21,6 +21,9 @@ NUM_IPS = 100
 NUM_TRANSACTIONS = 5000
 FRAUD_ACCOUNTS = 10
 START_DATE = datetime.now() - timedelta(days=90)
+NUM_ACCOUNTS = 2000
+NUM_DEVICES = 200
+NUM_TRANSACTIONS = 20000
 # ----------------------------
 
 def random_timestamp():

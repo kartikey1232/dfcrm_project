@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homedine — Eco-Friendly Kitchenware</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #1a3a2a;
+    --green-mid: #2d5a3d;
+    --green-sage: #6b8f71;
+    --green-light: #a8c5a0;
+    --cream: #f5f0e8;
+    --warm-white: #faf8f4;
+    --terracotta: #c17b4a;
+    --gold: #d4a853;
+    --dark: #1a1a17;
+    --text-muted: #7a7a6e;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--warm-white); color: var(--dark); overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 60px;
+    background: rgba(250,248,244,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(107,143,113,0.15);
+    transition: all 0.3s ease;
+  }
+  nav.scrolled { padding: 12px 60px; box-shadow: 0 4px 30px rgba(26,58,42,0.08); }
+  .nav-links { display: flex; gap: 36px; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--green-deep); text-decoration: none; letter-spacing: 0.02em; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--terracotta); }
+  .logo { font-family: var(--font-display); font-size: 26px; font-weight: 600; color: var(--green-deep); letter-spacing: -0.02em; }
+  .logo span { color: var(--terracotta); }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(107,143,113,0.1); border: 1px solid rgba(107,143,113,0.2);
+    border-radius: 30px; padding: 8px 16px; transition: all 0.2s;
+  }
+  .search-bar:hover { background: rgba(107,143,113,0.15); }
+  .search-bar input { border: none; background: transparent; outline: none; font-family: var(--font-body); font-size: 13px; color: var(--green-deep); width: 150px; }
+  .search-bar input::placeholder { color: var(--text-muted); }
+  .nav-icons { display: flex; gap: 10px; }
+  .nav-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; color: var(--green-deep);
+    font-size: 16px; background: transparent; border: none;
+  }
+  .nav-icon:hover { background: rgba(107,143,113,0.15); color: var(--terracotta); }
+
+  /* ── HERO ── */
+  .hero {
+    margin-top: 73px;
+    height: calc(100vh - 73px);
+    min-height: 600px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 60px;
+  }
+
+  /* ★ HERO BACKGROUND IMAGE */
+  .hero-bg-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .hero-left::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(26,58,42,0.55) 0%, rgba(15,30,20,0.78) 100%);
+    z-index: 1;
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(168,197,160,0.2); border: 1px solid rgba(168,197,160,0.3);
+    border-radius: 20px; padding: 6px 14px; margin-bottom: 24px;
+    font-size: 12px; font-weight: 500; color: var(--green-light);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-badge .dot { width: 6px; height: 6px; background: var(--green-light); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 4vw, 56px); font-weight: 700; line-height: 1.15;
+    color: white; margin-bottom: 20px;
+    animation: fadeUp 0.8s ease 0.1s both;
+  }
+  .hero-title em { font-style: italic; color: var(--green-light); }
+
+  .hero-subtitle {
+    font-size: 15px; color: rgba(255,255,255,0.72);
+    line-height: 1.7; max-width: 380px; margin-bottom: 36px;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .hero-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: white; color: var(--green-deep);
+    padding: 14px 28px; border-radius: 30px;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: all 0.3s ease; border: 2px solid white;
+    animation: fadeUp 0.8s ease 0.3s both; width: fit-content;
+  }
+  .hero-cta:hover { background: transparent; color: white; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+
+  .hero-stats {
+    position: absolute; bottom: 60px; right: 40px; z-index: 2;
+    background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
+    padding: 20px 24px; text-align: center;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+  .hero-stat-value { font-family: var(--font-display); font-size: 42px; font-weight: 700; color: white; line-height: 1; }
+  .hero-stat-labels { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+  .hero-stat-labels span { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em; text-transform: uppercase; }
+
+  /* ★ HERO RIGHT 2×2 GRID */
+  .hero-right {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hero-cell {
+    position: relative; overflow: hidden; cursor: pointer;
+    transition: transform 0.4s ease;
+    background: #2a4a38; /* fallback while image loads */
+  }
+  .hero-cell:hover { transform: scale(1.02); z-index: 1; }
+  .hero-cell img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease;
+  }
+  .hero-cell:hover img { transform: scale(1.06); }
+  .hero-cell-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 55%);
+  }
+  .cell-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.8); margin-bottom: 4px; }
+  .cell-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: white; line-height: 1.2; margin-bottom: 8px; }
+  .cell-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 500;
+    color: white; cursor: pointer; transition: all 0.2s; width: fit-content;
+  }
+  .cell-btn:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── CATEGORY STRIP ── */
+  .category-strip { display: flex; background: var(--green-deep); overflow-x: auto; }
+  .cat-item {
+    flex: 1; min-width: 180px; padding: 20px 24px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: background 0.2s;
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .cat-item:hover { background: rgba(255,255,255,0.05); }
+  /* ★ CATEGORY ICON IMAGE */
+  .cat-icon {
+    width: 44px; height: 44px; border-radius: 10px; overflow: hidden;
+    flex-shrink: 0; background: rgba(255,255,255,0.08);
+  }
+  .cat-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cat-text { display: flex; flex-direction: column; }
+  .cat-name { font-size: 13px; font-weight: 600; color: white; }
+  .cat-explore { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .cat-arrow { margin-left: auto; color: rgba(255,255,255,0.3); font-size: 12px; }
+
+  /* ── COMMON SECTION ── */
+  section { padding: 80px 60px; }
+  .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 48px; }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--terracotta); margin-bottom: 8px; }
+  .section-title { font-family: var(--font-display); font-size: clamp(28px, 3vw, 40px); font-weight: 600; line-height: 1.2; color: var(--green-deep); }
+  .section-title em { font-style: italic; color: var(--terracotta); }
+  .see-all {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--green-mid);
+    text-decoration: none; padding: 10px 20px; border-radius: 20px;
+    border: 1.5px solid var(--green-sage); transition: all 0.2s;
+  }
+  .see-all:hover { background: var(--green-deep); color: white; border-color: var(--green-deep); }
+
+  /* ── PRODUCTS ── */
+  .products-section { background: var(--warm-white); }
+  .products-carousel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+
+  .product-card {
+    background: white; border-radius: 20px; overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer; border: 1px solid rgba(107,143,113,0.1);
+  }
+  .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(26,58,42,0.12); }
+
+  /* ★ PRODUCT IMAGE */
+  .product-img {
+    aspect-ratio: 1; position: relative; overflow: hidden;
+    background: var(--cream);
+  }
+  .product-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease;
+  }
+  .product-card:hover .product-img img { transform: scale(1.06); }
+
+  .product-tag {
+    position: absolute; top: 14px; left: 14px;
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.03em;
+  }
+  .tag-promo { background: rgba(193,123,74,0.15); color: var(--terracotta); }
+  .tag-new { background: rgba(45,90,61,0.12); color: var(--green-mid); }
+  .tag-fav { background: rgba(212,168,83,0.15); color: #9a7218; }
+
+  .color-dots { position: absolute; bottom: 14px; left: 14px; display: flex; gap: 6px; }
+  .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s; }
+  .color-dot:hover { transform: scale(1.2); }
+  .color-dot.active { border-color: var(--green-deep); }
+
+  .product-info { padding: 18px 20px; }
+  .product-name { font-size: 14px; font-weight: 500; color: var(--dark); line-height: 1.4; margin-bottom: 12px; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-price { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--green-deep); }
+  .add-cart {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--green-deep); color: white;
+    padding: 9px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;
+  }
+  .add-cart:hover { background: var(--green-mid); transform: scale(1.05); }
+
+  /* ── BESTSELLERS ── */
+  .bestsellers-section { background: var(--cream); }
+  .bs-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: start; }
+  .bs-list { display: flex; flex-direction: column; gap: 16px; }
+  .bs-item {
+    display: flex; align-items: center; gap: 16px;
+    background: white; border-radius: 16px; padding: 16px 20px;
+    cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent;
+  }
+  .bs-item:hover, .bs-item.active { border-color: var(--green-sage); box-shadow: 0 4px 20px rgba(107,143,113,0.15); }
+  .bs-num { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: rgba(26,58,42,0.1); min-width: 32px; line-height: 1; }
+  .bs-item.active .bs-num { color: var(--green-deep); }
+
+  /* ★ BESTSELLER THUMBNAIL IMAGE */
+  .bs-thumb {
+    width: 56px; height: 56px; border-radius: 12px; overflow: hidden;
+    flex-shrink: 0; background: var(--cream);
+  }
+  .bs-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .bs-info { flex: 1; }
+  .bs-name { font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
+  .bs-price { font-size: 13px; color: var(--text-muted); }
+  .bs-price strong { color: var(--green-deep); }
+
+  .bs-right { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(26,58,42,0.08); position: sticky; top: 100px; }
+
+  /* ★ BESTSELLER FEATURED IMAGE */
+  .bs-featured-img { height: 300px; overflow: hidden; background: var(--cream); }
+  .bs-featured-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease;
+  }
+  .bs-featured-img:hover img { transform: scale(1.05); }
+
+  .bs-featured-info { padding: 28px; }
+  .bs-featured-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--green-deep); margin-bottom: 8px; }
+  .bs-featured-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; }
+  .bs-featured-footer { display: flex; align-items: center; justify-content: space-between; }
+
+  /* ── NEW ARRIVAL BANNER ── */
+  .arrival-banner {
+    margin: 0 60px 60px; border-radius: 24px; overflow: hidden;
+    display: grid; grid-template-columns: 1fr 1fr;
+    box-shadow: 0 4px 30px rgba(26,58,42,0.06);
+  }
+  .arrival-content { background: var(--cream); padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+  .arrival-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--terracotta); margin-bottom: 12px; }
+  .arrival-title { font-family: var(--font-display); font-size: 36px; font-weight: 600; color: var(--green-deep); line-height: 1.2; margin-bottom: 16px; }
+  .arrival-title em { font-style: italic; }
+  .arrival-desc { font-size: 14px; color: var(--text-muted); line-height: 1.8; margin-bottom: 28px; }
+  .arrival-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--green-deep); color: white;
+    padding: 14px 28px; border-radius: 30px;
+    font-size: 14px; font-weight: 600; text-decoration: none; width: fit-content; transition: all 0.2s;
+  }
+  .arrival-btn:hover { background: var(--green-mid); transform: translateY(-2px); }
+
+  /* ★ ARRIVAL IMAGE */
+  .arrival-visual { overflow: hidden; min-height: 360px; }
+  .arrival-visual img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease;
+  }
+  .arrival-visual:hover img { transform: scale(1.04); }
+
+  /* ── GALLERY ── */
+  .gallery-section { background: var(--warm-white); }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 240px 240px;
+    gap: 12px; border-radius: 20px; overflow: hidden;
+  }
+  .gallery-item { position: relative; overflow: hidden; cursor: pointer; background: var(--cream); }
+  .gallery-item:nth-child(1) { grid-row: 1 / 3; }
+
+  /* ★ GALLERY IMAGES */
+  .gallery-item img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease;
+  }
+  .gallery-item:hover img { transform: scale(1.08); }
+
+  .gallery-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(26,58,42,0.7) 0%, transparent 50%);
+    opacity: 0; transition: opacity 0.3s;
+    display: flex; align-items: flex-end; padding: 20px;
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+  .gallery-overlay span { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: white; }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-section { background: var(--green-deep); position: relative; overflow: hidden; }
+  .testimonials-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(168,197,160,0.08) 0%, transparent 60%); }
+  .testimonials-section .section-title { color: white; }
+  .testimonials-section .section-label { color: var(--green-light); }
+  .rating-num { font-family: var(--font-display); font-size: 72px; font-weight: 700; color: white; line-height: 1; }
+  .rating-details { display: flex; flex-direction: column; gap: 4px; }
+  .stars { color: var(--gold); font-size: 18px; letter-spacing: 2px; }
+  .rating-count { font-size: 13px; color: rgba(255,255,255,0.6); }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .testimonial-card {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 28px; transition: all 0.3s;
+  }
+  .testimonial-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-4px); }
+  .t-quote-icon { font-size: 28px; color: var(--gold); margin-bottom: 16px; }
+  .t-text { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.8); margin-bottom: 20px; }
+  .t-author { display: flex; align-items: center; gap: 12px; }
+
+  /* ★ REVIEWER AVATAR IMAGE */
+  .t-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--green-sage); flex-shrink: 0; }
+  .t-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .t-name { font-size: 14px; font-weight: 600; color: white; }
+  .t-role { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+  /* ── SUSTAINABILITY ── */
+  .sustain-section { background: var(--cream); padding: 80px 60px; }
+  .sustain-inner {
+    background: white; border-radius: 28px; padding: 60px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center; box-shadow: 0 4px 30px rgba(26,58,42,0.06);
+  }
+  .sustain-title { font-family: var(--font-display); font-size: 36px; font-weight: 600; line-height: 1.3; color: var(--green-deep); margin-bottom: 20px; }
+  .sustain-title em { font-style: italic; color: var(--terracotta); }
+  .sustain-text { font-size: 15px; line-height: 1.8; color: var(--text-muted); margin-bottom: 32px; }
+  .sustain-values { display: flex; gap: 32px; flex-wrap: wrap; }
+  .value-item { display: flex; align-items: center; gap: 10px; }
+  .value-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(107,143,113,0.12); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .value-label { font-size: 13px; font-weight: 600; color: var(--green-deep); }
+
+  .sustain-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ★ SUSTAINABILITY IMAGES */
+  .sustain-img { border-radius: 16px; overflow: hidden; background: var(--cream); }
+  .sustain-img:first-child { grid-row: span 2; }
+  .sustain-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+  .sustain-img:hover img { transform: scale(1.04); }
+
+  /* ── NEWSLETTER ── */
+  .newsletter { background: var(--green-deep); padding: 60px; text-align: center; }
+  .newsletter-inner { max-width: 560px; margin: auto; }
+  .newsletter h3 { font-family: var(--font-display); font-size: 32px; color: white; margin-bottom: 12px; }
+  .newsletter p { color: rgba(255,255,255,0.6); margin-bottom: 28px; line-height: 1.7; }
+  .newsletter-form { display: flex; max-width: 420px; margin: auto; }
+  .newsletter-form input {
+    flex: 1; padding: 14px 20px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    border-right: none; border-radius: 30px 0 0 30px;
+    font-family: var(--font-body); font-size: 14px; color: white; outline: none;
+  }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.4); }
+  .newsletter-form button {
+    padding: 14px 24px; background: var(--gold); color: var(--dark);
+    border: none; border-radius: 0 30px 30px 0;
+    font-size: 14px; font-weight: 600; font-family: var(--font-body);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .newsletter-form button:hover { background: #e8b85a; }
+
+  /* ── FOOTER ── */
+  footer { background: #0f1f16; padding: 60px 60px 30px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 48px; }
+  .footer-logo { font-family: var(--font-display); font-size: 28px; font-weight: 600; color: white; margin-bottom: 16px; }
+  .footer-logo span { color: var(--terracotta); }
+  .footer-tagline { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; margin-bottom: 24px; }
+  .footer-socials { display: flex; gap: 10px; }
+  .social-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+    background: transparent; color: rgba(255,255,255,0.5); text-decoration: none;
+  }
+  .social-btn:hover { border-color: var(--green-sage); color: var(--green-sage); }
+  .footer-col h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); margin-bottom: 20px; }
+  .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.65); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--green-light); }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-size: 13px; color: rgba(255,255,255,0.3); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav id="navbar">
+  <div class="nav-links">
+    <a href="#">Shop</a>
+    <a href="#">Bestsellers</a>
+    <a href="#">Gallery</a>
+    <a href="#">About</a>
+  </div>
+  <div class="logo">Home<span>dine</span></div>
+  <div class="nav-right">
+    <div class="search-bar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search Products...">
+    </div>
+    <div class="nav-icons">
+      <button class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      </button>
+      <button class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-left">
+    <!-- ★ Replace with your hero kitchen background photo -->
+    <img class="hero-bg-img" src="https://plus.unsplash.com/premium_photo-1683140941523-f1fbbabe54d5?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z3JlZW4lMjBraXRjaGVufGVufDB8fDB8fHww" alt="Eco-friendly kitchen">
+
+    <div class="hero-content">
+      <div class="hero-badge"><div class="dot"></div>Natural. Sustainable. Eco-conscious.</div>
+      <h1 class="hero-title">Eco-Friendly<br><em>Kitchenware</em> for<br>a greener home</h1>
+      <p class="hero-subtitle">Discover our curated collection of planet-friendly kitchen essentials, designed for mindful cooking and sustainable living.</p>
+      <a href="#" class="hero-cta">Shop now &rarr;</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat-value">96%</div>
+      <div class="hero-stat-labels"><span>Customer</span><span>Satisfaction</span></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <!-- ★ Replace each src with your 4 category images -->
+    <div class="hero-cell">
+      <img src="YOUR_CUPEECO_IMAGE.jpg" alt="CupEco Collection">
+      <div class="hero-cell-content">
+        <span class="cell-tag">Explore</span>
+        <div class="cell-title">CupEco Collection</div>
+        <div class="cell-btn">Shop It →</div>
+      </div>
+    </div>
+    <div class="hero-cell">
+      <img src="YOUR_ECOSPOONERY_IMAGE.jpg" alt="EcoSpoonery">
+      <div class="hero-cell-content">
+        <span class="cell-tag">Explore</span>
+        <div class="cell-title">EcoSpoonery</div>
+        <div class="cell-btn">Shop It →</div>
+      </div>
+    </div>
+    <div class="hero-cell">
+      <img src="YOUR_NATURESLIP_IMAGE.jpg" alt="NatureSlip">
+      <div class="hero-cell-content">
+        <span class="cell-tag">Explore</span>
+        <div class="cell-title">NatureSlip</div>
+        <div class="cell-btn">Shop It →</div>
+      </div>
+    </div>
+    <div class="hero-cell">
+      <img src="YOUR_FRESHPITCHER_IMAGE.jpg" alt="Fresh Pitcher">
+      <div class="hero-cell-content">
+        <span class="cell-tag">Explore</span>
+        <div class="cell-title">Fresh Pitcher</div>
+        <div class="cell-btn">Shop It →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CATEGORY STRIP ══ -->
+<div class="category-strip">
+  <!-- ★ Replace each src with small category icon/thumbnail -->
+  <div class="cat-item">
+    <div class="cat-icon"><img src="YOUR_CAT1_ICON.jpg" alt="CupEco"></div>
+    <div class="cat-text"><span class="cat-name">CupEco</span><span class="cat-explore">Explore collection</span></div>
+    <span class="cat-arrow">→</span>
+  </div>
+  <div class="cat-item">
+    <div class="cat-icon"><img src="YOUR_CAT2_ICON.jpg" alt="EcoSpoonery"></div>
+    <div class="cat-text"><span class="cat-name">EcoSpoonery</span><span class="cat-explore">Explore collection</span></div>
+    <span class="cat-arrow">→</span>
+  </div>
+  <div class="cat-item">
+    <div class="cat-icon"><img src="YOUR_CAT3_ICON.jpg" alt="NatureSlip"></div>
+    <div class="cat-text"><span class="cat-name">NatureSlip</span><span class="cat-explore">Explore collection</span></div>
+    <span class="cat-arrow">→</span>
+  </div>
+  <div class="cat-item">
+    <div class="cat-icon"><img src="YOUR_CAT4_ICON.jpg" alt="Fresh Pitcher"></div>
+    <div class="cat-text"><span class="cat-name">Fresh Pitcher</span><span class="cat-explore">Explore collection</span></div>
+    <span class="cat-arrow">→</span>
+  </div>
+</div>
+
+<!-- ══ PRODUCTS ══ -->
+<section class="products-section reveal">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Eco Essentials</div>
+      <h2 class="section-title">Planet-Friendly Bestselling <em>Products</em></h2>
+    </div>
+    <a href="#" class="see-all">More products →</a>
+  </div>
+  <div class="products-carousel">
+
+    <div class="product-card">
+      <div class="product-img">
+        <!-- ★ Replace src -->
+        <img src="YOUR_PRODUCT1_IMAGE.jpg" alt="Reusable drinkware">
+        <span class="product-tag tag-promo">Promotion</span>
+        <div class="color-dots">
+          <div class="color-dot active" style="background:#4a9b72"></div>
+          <div class="color-dot" style="background:#7ab5e8"></div>
+          <div class="color-dot" style="background:#e87a7a"></div>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Reusable drinkware for a greener lifestyle.</div>
+        <div class="product-footer">
+          <div class="product-price">$43.85</div>
+          <button class="add-cart">+ Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <!-- ★ Replace src -->
+        <img src="YOUR_PRODUCT2_IMAGE.jpg" alt="Non-toxic cookware">
+        <span class="product-tag tag-new">New</span>
+        <div class="color-dots">
+          <div class="color-dot active" style="background:#c5a02a"></div>
+          <div class="color-dot" style="background:#e87a7a"></div>
+          <div class="color-dot" style="background:#4a9b72"></div>
+          <div class="color-dot" style="background:#7ab5e8"></div>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Non-toxic cookware for sustainable cooking.</div>
+        <div class="product-footer">
+          <div class="product-price">$78.35</div>
+          <button class="add-cart">+ Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <!-- ★ Replace src -->
+        <img src="YOUR_PRODUCT3_IMAGE.jpg" alt="Kettle and Toaster">
+        <span class="product-tag tag-fav">Customer favorite</span>
+        <div class="color-dots">
+          <div class="color-dot active" style="background:#c17b4a"></div>
+          <div class="color-dot" style="background:#4a9b72"></div>
+          <div class="color-dot" style="background:#c5a02a"></div>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Kettle &amp; Toaster eco-friendly meals.</div>
+        <div class="product-footer">
+          <div class="product-price">$143.65</div>
+          <button class="add-cart">+ Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <!-- ★ Replace src -->
+        <img src="YOUR_PRODUCT4_IMAGE.jpg" alt="Bamboo Utensil Holder">
+        <span class="product-tag tag-new">New</span>
+        <div class="color-dots">
+          <div class="color-dot active" style="background:#8a6a3a"></div>
+          <div class="color-dot" style="background:#c5a02a"></div>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Bamboo Made Utensil Holder</div>
+        <div class="product-footer">
+          <div class="product-price">$26.27</div>
+          <button class="add-cart">+ Cart</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ BESTSELLERS ══ -->
+<section class="bestsellers-section reveal">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Top Rated</div>
+      <h2 class="section-title">Best <em>sellers</em></h2>
+    </div>
+    <a href="#" class="see-all">View all →</a>
+  </div>
+  <div class="bs-grid">
+    <div class="bs-list">
+
+      <div class="bs-item active" data-index="0">
+        <div class="bs-num">01</div>
+        <!-- ★ Replace src -->
+        <div class="bs-thumb"><img src="YOUR_BS1_THUMB.jpg" alt="OaziSteam Rice Pot"></div>
+        <div class="bs-info"><div class="bs-name">OaziSteam Rice Pot</div><div class="bs-price">from <strong>$89.00</strong></div></div>
+      </div>
+
+      <div class="bs-item" data-index="1">
+        <div class="bs-num">02</div>
+        <!-- ★ Replace src -->
+        <div class="bs-thumb"><img src="YOUR_BS2_THUMB.jpg" alt="Bamboo Storage Set"></div>
+        <div class="bs-info"><div class="bs-name">Bamboo Storage Set</div><div class="bs-price">from <strong>$45.00</strong></div></div>
+      </div>
+
+      <div class="bs-item" data-index="2">
+        <div class="bs-num">03</div>
+        <!-- ★ Replace src -->
+        <div class="bs-thumb"><img src="YOUR_BS3_THUMB.jpg" alt="Grain Slice Board Duo"></div>
+        <div class="bs-info"><div class="bs-name">Grain Slice Board Duo</div><div class="bs-price">from <strong>$38.00</strong></div></div>
+      </div>
+
+      <div class="bs-item" data-index="3">
+        <div class="bs-num">04</div>
+        <!-- ★ Replace src -->
+        <div class="bs-thumb"><img src="YOUR_BS4_THUMB.jpg" alt="Linen Pot Container"></div>
+        <div class="bs-info"><div class="bs-name">Linen Pot Container</div><div class="bs-price">from <strong>$29.00</strong></div></div>
+      </div>
+
+    </div>
+
+    <div class="bs-right">
+      <div class="bs-featured-img">
+        <!-- ★ Replace src — also updated by JS on tab click -->
+        <img id="bsFeatImg" src="YOUR_BS1_FEATURED.jpg" alt="Featured bestseller">
+      </div>
+      <div class="bs-featured-info">
+        <div class="bs-featured-title" id="bsFeatTitle">OaziSteam Rice Pot</div>
+        <div class="bs-featured-desc" id="bsFeatDesc">A polished cooking rice pot rests on a rustic wooden surface, encircled by fresh herbs — a perfect blend of durability and nature for mindful cooking.</div>
+        <div class="bs-featured-footer">
+          <div class="product-price" id="bsFeatPrice">$89.00</div>
+          <button class="add-cart">Shop now →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NEW ARRIVAL BANNER ══ -->
+<div class="arrival-banner reveal">
+  <div class="arrival-content">
+    <div class="arrival-label">Just Dropped</div>
+    <h2 class="arrival-title">New <em>Arrival</em></h2>
+    <p class="arrival-desc">A OaziSteam showcases a colorful array of fresh, seasonal vegetables — a vibrant celebration of zero-waste, planet-friendly kitchen practices.</p>
+    <a href="#" class="arrival-btn">Shop now →</a>
+  </div>
+  <!-- ★ Replace src with your new arrival product image -->
+  <div class="arrival-visual">
+    <img src="YOUR_ARRIVAL_IMAGE.jpg" alt="New Arrival product">
+  </div>
+</div>
+
+<!-- ══ GALLERY ══ -->
+<section class="gallery-section reveal">
+  <div class="section-header">
+    <div>
+      <div class="section-label">Thoughtful, Planet-Prioritizing Ideas</div>
+      <h2 class="section-title">and Inspiration <em>Gallery</em></h2>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="nav-icon" style="border:1px solid rgba(107,143,113,0.3)">←</button>
+      <button class="nav-icon" style="border:1px solid rgba(107,143,113,0.3)">→</button>
+    </div>
+  </div>
+  <div class="gallery-grid">
+    <!-- ★ Replace each src. First image spans 2 rows (tall) -->
+    <div class="gallery-item">
+      <img src="YOUR_GALLERY1_IMAGE.jpg" alt="SizzlePro Non-Stick Pan">
+      <div class="gallery-overlay"><span>SizzlePro Non-Stick Pan</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="YOUR_GALLERY2_IMAGE.jpg" alt="Grain Slice Board Duo">
+      <div class="gallery-overlay"><span>Grain Slice Board Duo</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="YOUR_GALLERY3_IMAGE.jpg" alt="Bamboo Utensil Set">
+      <div class="gallery-overlay"><span>Bamboo Utensil Set</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="YOUR_GALLERY4_IMAGE.jpg" alt="Linen Pot Container">
+      <div class="gallery-overlay"><span>Linen Pot Container</span></div>
+    </div>
+    <div class="gallery-item">
+      <img src="YOUR_GALLERY5_IMAGE.jpg" alt="StoneSip Ceramic Cup">
+      <div class="gallery-overlay"><span>StoneSip Ceramic Cup</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="testimonials-section reveal">
+  <div class="section-header">
+    <div>
+      <div class="section-label">What customers say</div>
+      <h2 class="section-title">Loved by <em style="color:var(--gold)">25,000+</em> homes</h2>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:32px;margin-bottom:48px;">
+    <div class="rating-num">4.9</div>
+    <div class="rating-details">
+      <div class="stars">★★★★★</div>
+      <div class="rating-count">More than 25,000 5-Star Reviews for Our Award-Winning Eco Products</div>
+    </div>
+  </div>
+  <div class="testimonials-grid">
+
+    <div class="testimonial-card">
+      <div class="t-quote-icon">❝</div>
+      <p class="t-text">HomeDine's glass jars are awesome for storage, and the bamboo utensils are perfect for daily use!</p>
+      <div class="t-author">
+        <!-- ★ Replace src with reviewer photo -->
+        <div class="t-avatar"><img src="YOUR_REVIEWER1_PHOTO.jpg" alt="Jane Cooper"></div>
+        <div><div class="t-name">Jane Cooper</div><div class="t-role">Customer</div></div>
+      </div>
+    </div>
+
+    <div class="testimonial-card">
+      <div class="t-quote-icon">❝</div>
+      <p class="t-text">Fantastic products and fast delivery. My kitchen feels so much greener now!</p>
+      <div class="t-author">
+        <!-- ★ Replace src -->
+        <div class="t-avatar"><img src="YOUR_REVIEWER2_PHOTO.jpg" alt="Dantene Robertson"></div>
+        <div><div class="t-name">Dantene Robertson</div><div class="t-role">Home Cook</div></div>
+      </div>
+    </div>
+
+    <div class="testimonial-card">
+      <div class="t-quote-icon">❝</div>
+      <p class="t-text">Love HomeDine's eco-style! Glass jars keep things fresh, and bamboo utensils are so chic.</p>
+      <div class="t-author">
+        <!-- ★ Replace src -->
+        <div class="t-avatar"><img src="YOUR_REVIEWER3_PHOTO.jpg" alt="Esther House"></div>
+        <div><div class="t-name">Esther House</div><div class="t-role">Slow Kitchen</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ SUSTAINABILITY ══ -->
+<section class="sustain-section reveal">
+  <div class="sustain-inner">
+    <div>
+      <div class="section-label">Our Commitment</div>
+      <h2 class="sustain-title">Discover our commitment to<br><em>sustainable</em> materials,<br>low-impact production</h2>
+      <p class="sustain-text">We use ethical sourcing partnerships — all crafted to support a healthier planet and a greener kitchen. Every product is thoughtfully designed with the environment in mind.</p>
+      <div class="sustain-values">
+        <div class="value-item"><div class="value-icon">🌿</div><div class="value-label">Eco Materials</div></div>
+        <div class="value-item"><div class="value-icon">♻️</div><div class="value-label">Zero Waste</div></div>
+        <div class="value-item"><div class="value-icon">🤝</div><div class="value-label">Fair Trade</div></div>
+      </div>
+    </div>
+    <div class="sustain-visual">
+      <!-- ★ Replace each src with lifestyle/sustainability photos. First image is tall (spans 2 rows) -->
+      <div class="sustain-img"><img src="YOUR_SUSTAIN1_IMAGE.jpg" alt="Sustainable kitchen"></div>
+      <div class="sustain-img"><img src="YOUR_SUSTAIN2_IMAGE.jpg" alt="Eco cooking"></div>
+      <div class="sustain-img"><img src="YOUR_SUSTAIN3_IMAGE.jpg" alt="Green living"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NEWSLETTER ══ -->
+<div class="newsletter">
+  <div class="newsletter-inner">
+    <h3>Join the Green Kitchen Movement</h3>
+    <p>Get early access to new arrivals, eco tips, and exclusive member discounts delivered to your inbox.</p>
+    <div class="newsletter-form">
+      <input type="email" placeholder="Your email address...">
+      <button>Subscribe →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Home<span>dine</span></div>
+      <p class="footer-tagline">Eco-friendly kitchenware for mindful cooking and sustainable living. Every purchase plants a tree. 🌳</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn">𝕏</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">ig</a>
+        <a href="#" class="social-btn">yt</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a href="#">Cookware</a><a href="#">Drinkware</a><a href="#">Storage</a><a href="#">Utensils</a><a href="#">Bestsellers</a>
+    </div>
+    <div class="footer-col">
+      <h4>About</h4>
+      <a href="#">Our Story</a><a href="#">Sustainability</a><a href="#">Blog</a><a href="#">Press</a>
+    </div>
+    <div class="footer-col">
+      <h4>Help</h4>
+      <a href="#">FAQ</a><a href="#">Shipping</a><a href="#">Returns</a><a href="#">Contact Us</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Homedine. All rights reserved.</p>
+    <p>Privacy Policy · Terms of Service</p>
+  </div>
+</footer>
+
+<script>
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => { if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 60); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ★ Bestseller tab data — update the img src values to match your images
+  const bsData = [
+    { img: 'YOUR_BS1_FEATURED.jpg', title: 'OaziSteam Rice Pot',    desc: 'A polished cooking rice pot rests on a rustic wooden surface, encircled by fresh herbs — a perfect blend of durability and nature for mindful cooking.', price: '$89.00' },
+    { img: 'YOUR_BS2_FEATURED.jpg', title: 'Bamboo Storage Set',    desc: 'Premium bamboo storage containers with airtight seals, keeping your pantry organized and eco-conscious.',                                                  price: '$45.00' },
+    { img: 'YOUR_BS3_FEATURED.jpg', title: 'Grain Slice Board Duo', desc: 'Handcrafted dual-purpose cutting board made from sustainable grain wood, perfect for slicing and serving.',                                               price: '$38.00' },
+    { img: 'YOUR_BS4_FEATURED.jpg', title: 'Linen Pot Container',   desc: 'Beautiful linen-wrapped pot container that keeps your herbs fresh while adding natural elegance to your kitchen.',                                          price: '$29.00' },
+  ];
+
+  document.querySelectorAll('.bs-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.bs-item').forEach(b => b.classList.remove('active'));
+      item.classList.add('active');
+      const d = bsData[+item.dataset.index];
+      document.getElementById('bsFeatImg').src = d.img;
+      document.getElementById('bsFeatTitle').textContent = d.title;
+      document.getElementById('bsFeatDesc').textContent  = d.desc;
+      document.getElementById('bsFeatPrice').textContent = d.price;
+    });
+  });
+
+  // Cart button flash
+  document.querySelectorAll('.add-cart').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const orig = this.textContent;
+      this.textContent = '✓ Added!';
+      this.style.background = '#2d9a5a';
+      setTimeout(() => { this.textContent = orig; this.style.background = ''; }, 1800);
+    });
+  });
+</script>
+</body>
+</html>
